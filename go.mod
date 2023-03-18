@@ -1,3 +1,3 @@
-module github.com/lollipopkit/go-common
+module github.com/lollipopkit/gommon
 
 go 1.20
