@@ -13,6 +13,21 @@ var (
 	_perm os.FileMode
 )
 
+const (
+	red       = "\033[91m"
+	green     = "\033[32m"
+	yellow    = "\033[93m"
+	cyan      = "\033[96m"
+	noColor   = "\033[0m"
+)
+
+const (
+	warn = yellow + "[WARN] " + noColor
+	err = red + "[ERROR] " + noColor
+	info = cyan + "[INFO] " + noColor
+	success = green + "[SUC] " + noColor
+)
+
 func SetPath(logDir string, perm os.FileMode) {
 	if err := os.MkdirAll(_logDir, _perm); err != nil {
 		panic(err)
@@ -29,19 +44,23 @@ func SetDebug(debug bool) {
 	_debug = debug
 }
 
-func W(format string, args ...any) {
-	log.Printf("[WARN] "+format, args...)
+func Warn(format string, args ...any) {
+	log.Printf(warn+format, args...)
 }
 
-func I(format string, args ...any) {
-	log.Printf("[INFO] "+format, args...)
+func Info(format string, args ...any) {
+	log.Printf(info+format, args...)
 }
 
-func E(format string, args ...any) {
-	log.Printf("[ERROR] "+format, args...)
+func Err(format string, args ...any) {
+	log.Printf(err+format, args...)
 }
 
-func D(format string, args ...any) {
+func Suc(format string, args ...any) {
+	log.Printf(success+format, args...)
+}
+
+func Debug(format string, args ...any) {
 	if !_debug {
 		return
 	}
