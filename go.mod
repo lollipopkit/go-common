@@ -1,3 +1,3 @@
-module github.com/lollipopkit/logger
+module github.com/lollipopkit/go-common
 
 go 1.20
