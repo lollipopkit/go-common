@@ -28,7 +28,7 @@ const (
 	success = green + "[SUC] " + noColor
 )
 
-func SetPath(logDir string, perm os.FileMode) {
+func Config(logDir string, perm os.FileMode) {
 	if err := os.MkdirAll(_logDir, _perm); err != nil {
 		panic(err)
 	}
