@@ -51,7 +51,7 @@ func printf(format string, args ...any) {
 	if _printTime {
 		format = time.Now().Format("2006-01-02 15:04:05") + " " + format
 	}
-	f := fmt.Sprintf(format, args...)
+	f := fmt.Sprintf(format + "\n", args...)
 	if _writer == nil {
 		print(f)
 	} else {
@@ -63,16 +63,32 @@ func Warn(format string, args ...any) {
 	printf(warn+format, args...)
 }
 
+func Yellow(format string, args ...any) {
+	fmt.Printf(YELLOW+format+NOCOLOR, args...)
+}
+
 func Info(format string, args ...any) {
 	printf(info+format, args...)
+}
+
+func Cyan(format string, args ...any) {
+	fmt.Printf(CYAN+format+NOCOLOR, args...)
 }
 
 func Err(format string, args ...any) {
 	printf(err+format, args...)
 }
 
+func Red(format string, args ...any) {
+	fmt.Printf(RED+format+NOCOLOR, args...)
+}
+
 func Suc(format string, args ...any) {
 	printf(success+format, args...)
+}
+
+func Green(format string, args ...any) {
+	fmt.Printf(GREEN+format+NOCOLOR, args...)
 }
 
 func Debug(format string, args ...any) {

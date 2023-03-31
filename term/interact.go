@@ -33,7 +33,7 @@ func ReadLine(linesHistory []string, onCtrlC func(), prompt string) string {
 	keyboard.Listen(func(key keys.Key) (stop bool, err error) {
 		switch key.Code {
 		case keys.CtrlC:
-			os.Exit(0)
+			onCtrlC()
 		case keys.Escape:
 			return true, nil
 		case keys.RuneKey:
@@ -115,6 +115,7 @@ func ReadLine(linesHistory []string, onCtrlC func(), prompt string) string {
 
 func resetLine(rs []rune, prompt string) {
 	cursor.ClearLine()
+	cursor.StartOfLine()
 	print(prompt + string(rs))
 }
 
