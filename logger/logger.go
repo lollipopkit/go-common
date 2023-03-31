@@ -9,22 +9,22 @@ import (
 
 var (
 	_debug, _inited bool
-	_logDir string
-	_perm os.FileMode
+	_logDir         string
+	_perm           os.FileMode
 )
 
 const (
-	red       = "\033[91m"
-	green     = "\033[32m"
-	yellow    = "\033[93m"
-	cyan      = "\033[96m"
-	noColor   = "\033[0m"
+	red     = "\033[91m"
+	green   = "\033[32m"
+	yellow  = "\033[93m"
+	cyan    = "\033[96m"
+	noColor = "\033[0m"
 )
 
 const (
-	warn = yellow + "[WARN] " + noColor
-	err = red + "[ERROR] " + noColor
-	info = cyan + "[INFO] " + noColor
+	warn    = yellow + "[WARN] " + noColor
+	err     = red + "[ERROR] " + noColor
+	info    = cyan + "[INFO] " + noColor
 	success = green + "[SUC] " + noColor
 )
 
