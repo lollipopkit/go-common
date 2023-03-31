@@ -31,11 +31,10 @@ type spinner struct {
 }
 
 // NewSpinner returns a new spinner.
-func NewSpinner(suffix string, frames []string, interval time.Duration) *spinner {
+func NewSpinner(frames []string, interval time.Duration) *spinner {
 	return &spinner{
 		Frames: frames,
 		Interval: interval,
-		Suffix: suffix,
 	}
 }
 
@@ -51,14 +50,18 @@ func (s *spinner) Start() error {
 	}
 
 	s.Ticker = time.NewTicker(s.Interval)
-	suffix := strings.TrimSpace(s.Suffix)
 	go func() {
 		for range s.Ticker.C {
 			s.Index = (s.Index + 1) % len(s.Frames)
 			cursor.StartOfLine()
-			print(s.Frames[s.Index]  + " " + suffix)
+			print(s.Frames[s.Index]  + " " + strings.TrimSpace(s.Suffix))
 		}
 	}()
 
 	return nil
+}
+
+// SetString sets the suffix of the spinner.
+func (s *spinner) SetString(suffix string) {
+	s.Suffix = suffix
 }

@@ -8,7 +8,8 @@ import (
 )
 
 func TestTermSpinner(t *testing.T) {
-	spinner := term.NewSpinner("Loading...\n", term.Frames1, 77*time.Millisecond)
+	spinner := term.NewSpinner(term.Frames1, 77*time.Millisecond)
+	spinner.SetString("Loading...\n")
 	spinner.Start()
 	time.Sleep(3 * time.Second)
 	spinner.Stop()
