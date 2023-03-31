@@ -15,14 +15,16 @@ import (
 var (
 	doubleByteCharacterRegexp = regexp.MustCompile(`[^\x00-\xff]`)
 	emptyStringList           = []string{}
-	promptRunes               = []rune(prompt)
 )
 
 const (
-	prompt = "> "
+	_prompt = "> "
 )
 
-func ReadLine(linesHistory []string, onCtrlC func()) string {
+func ReadLine(linesHistory []string, onCtrlC func(), prompt string) string {
+	if prompt == "" {
+		prompt = _prompt
+	}
 	os.Stdout.WriteString(prompt)
 	rs := []rune{}
 	linesIdx := len(linesHistory)
@@ -103,7 +105,8 @@ func ReadLine(linesHistory []string, onCtrlC func()) string {
 		}
 
 		idx := calcIdx(rs, runeIdx)
-		pIdx := calcIdx(promptRunes, len(promptRunes))
+		pRunes := []rune(prompt)
+		pIdx := calcIdx(pRunes, len(pRunes))
 		cursor.HorizontalAbsolute(idx + pIdx)
 		return false, nil
 	})
@@ -146,7 +149,7 @@ func Confirm(question string, default_ bool) bool {
 		return " [y/N]"
 	}()
 	Info("%s%s: ", question, suffix)
-	input := ReadLine(emptyStringList, exit)
+	input := ReadLine(emptyStringList, exit, "")
 	if input == "" {
 		return default_
 	}
@@ -160,7 +163,7 @@ func Option(question string, options []string, default_ int) int {
 	}
 	suffix := fmt.Sprintf("[default %d]", default_+1)
 	Info("%s %s:", question, suffix)
-	input := ReadLine(emptyStringList, exit)
+	input := ReadLine(emptyStringList, exit, "")
 	if input == "" {
 		return default_
 	}
