@@ -1,4 +1,4 @@
-package logger
+package term
 
 import (
 	"io"
@@ -14,18 +14,18 @@ var (
 )
 
 const (
-	red     = "\033[91m"
-	green   = "\033[32m"
-	yellow  = "\033[93m"
-	cyan    = "\033[96m"
-	noColor = "\033[0m"
+	RED     = "\033[91m"
+	GREEN   = "\033[32m"
+	YELLOW  = "\033[93m"
+	CYAN    = "\033[96m"
+	NOCOLOR = "\033[0m"
 )
 
 const (
-	warn    = yellow + "[WARN] " + noColor
-	err     = red + "[ERROR] " + noColor
-	info    = cyan + "[INFO] " + noColor
-	success = green + "[SUC] " + noColor
+	warn    = YELLOW + "[WARN] " + NOCOLOR
+	err     = RED + "[ERROR] " + NOCOLOR
+	info    = CYAN + "[INFO] " + NOCOLOR
+	success = GREEN + "[SUCCESS] " + NOCOLOR
 )
 
 func Config(logDir string, perm os.FileMode) {
