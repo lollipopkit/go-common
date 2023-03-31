@@ -1,8 +1,11 @@
 package term
 
 import (
+	"fmt"
 	"os"
 	"regexp"
+	"strconv"
+	"strings"
 
 	"atomicgo.dev/cursor"
 	"atomicgo.dev/keyboard"
@@ -11,7 +14,7 @@ import (
 
 var (
 	doubleByteCharacterRegexp = regexp.MustCompile(`[^\x00-\xff]`)
-	EmptyStringList           = []string{}
+	emptyStringList           = []string{}
 	promptRunes               = []rune(prompt)
 )
 
@@ -109,7 +112,6 @@ func ReadLine(linesHistory []string, onCtrlC func()) string {
 
 func resetLine(rs []rune, prompt string) {
 	cursor.ClearLine()
-	cursor.StartOfLine()
 	print(prompt + string(rs))
 }
 
@@ -130,4 +132,41 @@ func calcIdx(rs []rune, runeIdx int) int {
 
 func isHan(r rune) bool {
 	return doubleByteCharacterRegexp.MatchString(string(r))
+}
+
+func exit() {
+	os.Exit(0)
+}
+
+func Confirm(question string, default_ bool) bool {
+	suffix := func() string {
+		if default_ {
+			return " [Y/n]"
+		}
+		return " [y/N]"
+	}()
+	Info("%s%s: ", question, suffix)
+	input := ReadLine(emptyStringList, exit)
+	if input == "" {
+		return default_
+	}
+	return strings.ToLower(input) == "y"
+}
+
+func Option(question string, options []string, default_ int) int {
+	println()
+	for i := range options {
+		print(fmt.Sprintf("%d. %s\n", i+1, options[i]))
+	}
+	suffix := fmt.Sprintf("[default %d]", default_+1)
+	Info("%s %s:", question, suffix)
+	input := ReadLine(emptyStringList, exit)
+	if input == "" {
+		return default_
+	}
+	inputIdx, err := strconv.Atoi(input)
+	if err != nil {
+		return default_
+	}
+	return inputIdx - 1
 }
