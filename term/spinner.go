@@ -42,7 +42,8 @@ func (s *spinner) Stop() {
 		s.Ticker.Stop()
 	}
 	s.Ticker = nil
-	println()
+	cursor.ClearLine()
+	cursor.StartOfLine()
 }
 
 // Start starts the spinner.
@@ -52,13 +53,17 @@ func (s *spinner) Start(interval time.Duration) error {
 		for range s.Ticker.C {
 			s.Index = (s.Index + 1) % len(s.Frames)
 			cursor.StartOfLine()
-			print(s.Frames[s.Index] + " " + strings.TrimSpace(s.Suffix))
+			print(s.Frames[s.Index] + s.Suffix)
 		}
 	}()
 	return nil
 }
 
 // SetString sets the suffix of the spinner.
+// The suffix is trimmed and the first line is used.
+// Because the spinner is always on the same line, the suffix should not contain "\n".
 func (s *spinner) SetString(suffix string) {
-	s.Suffix = suffix
+	suffix = strings.TrimSpace(suffix)
+	suffix = strings.Split(suffix, "\n")[0]
+	s.Suffix = " " + suffix
 }
