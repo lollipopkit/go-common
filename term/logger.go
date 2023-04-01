@@ -51,7 +51,7 @@ func printf(format string, args ...any) {
 	if _printTime {
 		format = time.Now().Format("2006-01-02 15:04:05") + " " + format
 	}
-	f := fmt.Sprintf(format + "\n", args...)
+	f := fmt.Sprintf(format+"\n", args...)
 	if _writer == nil {
 		print(f)
 	} else {

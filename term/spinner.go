@@ -1,7 +1,6 @@
 package term
 
 import (
-	"errors"
 	"strings"
 	"time"
 
@@ -12,8 +11,6 @@ var (
 	Frames1 = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
 	Frames2 = []string{"-", "\\", "|", "/"}
 	Frames3 = []string{"◜", "◠", "◝", "◞", "◡", "◟"}
-
-	ErrSpinnerAlreadyStarted = errors.New("spinner already started")
 )
 
 // spinner is a simple spinner that can be used to indicate progress.
@@ -22,8 +19,6 @@ type spinner struct {
 	Frames []string
 	// Index is the current index of the spinner.
 	Index int
-	// Interval is the interval to use for the spinner.
-	Interval time.Duration
 	// Suffix is the suffix to use for the spinner.
 	Suffix string
 	// Ticker is the ticker used for the spinner.
@@ -31,25 +26,28 @@ type spinner struct {
 }
 
 // NewSpinner returns a new spinner.
-func NewSpinner(frames []string, interval time.Duration) *spinner {
+func NewCustomSpinner(frames []string) *spinner {
 	return &spinner{
 		Frames:   frames,
-		Interval: interval,
 	}
+}
+
+func NewSpinner() *spinner {
+	return NewCustomSpinner(Frames1)
 }
 
 // Stop stops the spinner.
 func (s *spinner) Stop() {
-	s.Ticker.Stop()
+	if s.Ticker != nil {
+		s.Ticker.Stop()
+	}
+	s.Ticker = nil
+	println()
 }
 
 // Start starts the spinner.
-func (s *spinner) Start() error {
-	if s.Ticker != nil {
-		return ErrSpinnerAlreadyStarted
-	}
-
-	s.Ticker = time.NewTicker(s.Interval)
+func (s *spinner) Start(interval time.Duration) error {
+	s.Ticker = time.NewTicker(interval)
 	go func() {
 		for range s.Ticker.C {
 			s.Index = (s.Index + 1) % len(s.Frames)
@@ -57,7 +55,6 @@ func (s *spinner) Start() error {
 			print(s.Frames[s.Index] + " " + strings.TrimSpace(s.Suffix))
 		}
 	}()
-
 	return nil
 }
 
