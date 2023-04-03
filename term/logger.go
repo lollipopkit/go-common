@@ -31,14 +31,14 @@ const (
 	success = GREEN + "[SUCCESS] " + NOCOLOR
 )
 
-func Config(logDir string, perm os.FileMode, printTime bool) {
-	if err := os.MkdirAll(_logDir, _perm); err != nil {
-		panic(err)
-	}
-
+func SetLog(logDir string, perm os.FileMode, printTime bool) {
 	_logDir = logDir
 	_perm = perm
 	_printTime = printTime
+	
+	if err := os.MkdirAll(_logDir, _perm); err != nil {
+		panic(err)
+	}
 
 	go setup()
 }
@@ -101,10 +101,12 @@ func Debug(format string, args ...any) {
 // Must call this func using:
 // `go setup()`
 func setup() {
+	if _ticker != nil {
+		_ticker.Stop()
+		_ticker = nil
+	}
 	if _ticker == nil {
 		_ticker = time.NewTicker(_interval)
-	} else {
-		_ticker.Reset(_interval)
 	}
 
 	for range _ticker.C {

@@ -3,8 +3,6 @@ package util
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -13,7 +11,6 @@ import (
 
 var (
 	httpClient     = http.DefaultClient
-	ErrBodySupport = errors.New("body only support string, []byte, map[any]any.")
 )
 
 func Exist(path string) bool {
@@ -28,14 +25,14 @@ func HttpDo(method, url string, content any, headers map[string]string) ([]byte,
 		body = strings.NewReader(content.(string))
 	case []byte:
 		body = bytes.NewReader(content.([]byte))
-	case map[any]any:
+	case nil:
+		// do nothing
+	default:
 		jsonBytes, err := json.Marshal(content)
 		if err != nil {
 			return nil, 0, err
 		}
 		body = bytes.NewReader(jsonBytes)
-	default:
-		return nil, 0, errors.Join(ErrBodySupport, fmt.Errorf("but body type: %T", content))
 	}
 
 	req, err := http.NewRequest(method, url, body)
