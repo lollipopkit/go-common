@@ -13,47 +13,50 @@ var (
 	Frames3 = []string{"◜", "◠", "◝", "◞", "◡", "◟"}
 )
 
-// spinner is a simple spinner that can be used to indicate progress.
+// spinner is a simple animation for terminal.
 type spinner struct {
-	// Frames is the list of frames to use for the spinner.
-	Frames []string
-	// Index is the current index of the spinner.
-	Index int
-	// Suffix is the suffix to use for the spinner.
-	Suffix string
-	// Ticker is the ticker used for the spinner.
-	Ticker *time.Ticker
+	// frames is the list of frames to use for the animation.
+	frames []string
+	// interval is the interval to use for the animation.
+	interval time.Duration
+	// index is the current index of the frames.
+	index int
+	// suffix is the string behind animation.
+	suffix string
+	// ticker is the ticker used for the animation.
+	ticker *time.Ticker
 }
 
 // NewSpinner returns a new spinner.
-func NewCustomSpinner(frames []string) *spinner {
+func NewCustomSpinner(frames []string, interval time.Duration) *spinner {
 	return &spinner{
-		Frames:   frames,
+		frames:   frames,
+		interval: interval,
 	}
 }
 
 func NewSpinner() *spinner {
-	return NewCustomSpinner(Frames1)
+	return NewCustomSpinner(Frames1, time.Millisecond * 77)
 }
 
 // Stop stops the spinner.
 func (s *spinner) Stop() {
-	if s.Ticker != nil {
-		s.Ticker.Stop()
+	if s.ticker != nil {
+		s.ticker.Stop()
 	}
-	s.Ticker = nil
+	s.ticker = nil
 	cursor.ClearLine()
 	cursor.StartOfLine()
 }
 
 // Start starts the spinner.
-func (s *spinner) Start(interval time.Duration) error {
-	s.Ticker = time.NewTicker(interval)
+func (s *spinner) Start() error {
+	s.ticker = time.NewTicker(s.interval)
 	go func() {
-		for range s.Ticker.C {
-			s.Index = (s.Index + 1) % len(s.Frames)
+		for range s.ticker.C {
+			s.index = (s.index + 1) % len(s.frames)
 			cursor.StartOfLine()
-			print(s.Frames[s.Index] + s.Suffix)
+			print(s.frames[s.index] + s.suffix)
 		}
 	}()
 	return nil
@@ -65,5 +68,5 @@ func (s *spinner) Start(interval time.Duration) error {
 func (s *spinner) SetString(suffix string) {
 	suffix = strings.TrimSpace(suffix)
 	suffix = strings.Split(suffix, "\n")[0]
-	s.Suffix = " " + suffix
+	s.suffix = " " + suffix
 }
