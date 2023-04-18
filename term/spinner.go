@@ -49,8 +49,8 @@ func (s *spinner) Stop() {
 	cursor.StartOfLine()
 }
 
-// Start starts the spinner.
-func (s *spinner) Start() error {
+// start starts the spinner.
+func (s *spinner) start() error {
 	s.ticker = time.NewTicker(s.interval)
 	go func() {
 		for range s.ticker.C {
@@ -66,6 +66,9 @@ func (s *spinner) Start() error {
 // The suffix is trimmed and the first line is used.
 // Because the spinner is always on the same line, the suffix should not contain "\n".
 func (s *spinner) SetString(suffix string) {
+	if s.ticker == nil {
+		defer s.start()
+	}
 	suffix = strings.TrimSpace(suffix)
 	suffix = strings.Split(suffix, "\n")[0]
 	s.suffix = " " + suffix
