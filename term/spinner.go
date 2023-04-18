@@ -40,13 +40,15 @@ func NewSpinner() *spinner {
 }
 
 // Stop stops the spinner.
-func (s *spinner) Stop() {
+func (s *spinner) Stop(clearLine bool) {
 	if s.ticker != nil {
 		s.ticker.Stop()
 	}
 	s.ticker = nil
-	cursor.ClearLine()
-	cursor.StartOfLine()
+	if clearLine {
+		cursor.ClearLine()
+		cursor.StartOfLine()
+	}
 }
 
 // start starts the spinner.

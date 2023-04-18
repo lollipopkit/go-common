@@ -1,15 +1,16 @@
-package term
+package main
 
 import (
-	"testing"
 	"time"
+
+	"github.com/lollipopkit/gommon/term"
 )
 
-func TestSpinner(t *testing.T) {
-	spinner := NewSpinner()
+func main() {
+	spinner := term.NewSpinner()
 	spinner.SetString("Loading...\n")
 	time.Sleep(3 * time.Second)
 	spinner.SetString("Fetching...")
 	time.Sleep(3 * time.Second)
-	spinner.Stop()
+	spinner.Stop(false)
 }
