@@ -25,10 +25,10 @@ const (
 )
 
 const (
-	warn    = YELLOW + "[WARN] " + NOCOLOR
-	err     = RED + "[ERROR] " + NOCOLOR
-	info    = CYAN + "[INFO] " + NOCOLOR
-	success = GREEN + "[SUCCESS] " + NOCOLOR
+	warn    = YELLOW + "[WAR] " + NOCOLOR
+	err     = RED + "[ERR] " + NOCOLOR
+	info    = CYAN + "[INF] " + NOCOLOR
+	success = GREEN + "[SUC] " + NOCOLOR
 )
 
 func SetLog(logDir string, perm os.FileMode, printTime bool) {
