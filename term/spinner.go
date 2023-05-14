@@ -48,6 +48,8 @@ func (s *spinner) Stop(clearLine bool) {
 	if clearLine {
 		cursor.ClearLine()
 		cursor.StartOfLine()
+	} else {
+		println()
 	}
 }
 
