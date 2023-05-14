@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	httpClient     = http.DefaultClient
+	httpClient = http.DefaultClient
 )
 
 func Exist(path string) bool {

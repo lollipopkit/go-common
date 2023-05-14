@@ -1,27 +1,12 @@
-package term
+package log
 
 import (
 	"fmt"
 	"io"
 	"os"
 	"time"
-)
 
-var (
-	_debug, _printTime bool
-	_logDir            string
-	_perm              os.FileMode
-	_writer            io.Writer
-	_ticker            *time.Ticker
-	_interval          = time.Minute
-)
-
-const (
-	RED     = "\033[91m"
-	GREEN   = "\033[32m"
-	YELLOW  = "\033[93m"
-	CYAN    = "\033[96m"
-	NOCOLOR = "\033[0m"
+	. "github.com/lollipopkit/gommon/res"
 )
 
 const (
@@ -31,31 +16,46 @@ const (
 	success = GREEN + "[SUC] " + NOCOLOR
 )
 
-func SetLog(logDir string, perm os.FileMode, printTime bool) {
-	_logDir = logDir
-	_perm = perm
-	_printTime = printTime
-	
-	if err := os.MkdirAll(_logDir, _perm); err != nil {
+type Config struct {
+	// Debug is the flag to enable debug log.
+	Debug bool
+	// PrintTime is the flag to print time.
+	PrintTime bool
+	// LogDir is the directory to store log files.
+	// If you set this to empty string (default), log files will not be created.
+	LogDir           string
+	// FilePerm is the permission of log files.
+	FilePerm             os.FileMode
+}
+
+var (
+	config Config
+	writer io.Writer
+	ticker *time.Ticker
+)
+
+func Setup(config_ Config) {
+	config = config_
+	if config.FilePerm == 0 {
+		config.FilePerm = 0755
+	}
+
+	if err := os.MkdirAll(config.LogDir, config.FilePerm); err != nil {
 		panic(err)
 	}
 
 	go setup()
 }
 
-func SetDebug(debug bool) {
-	_debug = debug
-}
-
 func printf(format string, args ...any) {
-	if _printTime {
+	if config.PrintTime {
 		format = time.Now().Format("2006-01-02 15:04:05") + " " + format
 	}
 	f := fmt.Sprintf(format+"\n", args...)
-	if _writer == nil {
+	if writer == nil {
 		print(f)
 	} else {
-		_writer.Write([]byte(f))
+		writer.Write([]byte(f))
 	}
 }
 
@@ -92,7 +92,7 @@ func Green(format string, args ...any) {
 }
 
 func Debug(format string, args ...any) {
-	if !_debug {
+	if !config.Debug {
 		return
 	}
 	printf("[DEBUG] "+format, args...)
@@ -101,20 +101,25 @@ func Debug(format string, args ...any) {
 // Must call this func using:
 // `go setup()`
 func setup() {
-	if _ticker != nil {
-		_ticker.Stop()
-		_ticker = nil
+	if ticker != nil {
+		ticker.Stop()
+		ticker = nil
 	}
-	if _ticker == nil {
-		_ticker = time.NewTicker(_interval)
+	// `logDir` not set
+	// no need to set `writer`
+	if len(config.LogDir) == 0 {
+		return
+	}
+	if ticker == nil {
+		ticker = time.NewTicker(time.Minute)
 	}
 
-	for range _ticker.C {
-		file := _logDir + time.Now().Format("2006-01-02") + ".txt"
-		logFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, _perm)
+	for range ticker.C {
+		file := config.LogDir + time.Now().Format("2006-01-02") + ".txt"
+		logFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, config.FilePerm)
 		if err != nil {
 			panic(err)
 		}
-		_writer = io.MultiWriter(os.Stdout, logFile)
+		writer = io.MultiWriter(os.Stdout, logFile)
 	}
 }

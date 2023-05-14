@@ -36,7 +36,7 @@ func NewCustomSpinner(frames []string, interval time.Duration) *spinner {
 }
 
 func NewSpinner() *spinner {
-	return NewCustomSpinner(Frames1, time.Millisecond * 77)
+	return NewCustomSpinner(Frames1, time.Millisecond*77)
 }
 
 // Stop stops the spinner.

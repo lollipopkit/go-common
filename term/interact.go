@@ -21,33 +21,48 @@ const (
 	_prompt = "> "
 )
 
-func ReadLine(linesHistory []string, onCtrlC func(), prompt string) string {
-	if prompt == "" {
-		prompt = _prompt
+type ReadLineConfig struct {
+	// History is the history of lines.
+	History []string
+	// OnCtrlC is the callback when Ctrl+C is pressed.
+	OnCtrlC func()
+	// Prompt is the prompt to show.
+	Prompt string
+}
+
+func ReadLine(config ReadLineConfig) string {
+	if len(config.Prompt) == 0 {
+		config.Prompt = _prompt
 	}
-	os.Stdout.WriteString(prompt)
+	if config.OnCtrlC == nil {
+		config.OnCtrlC = exit
+	}
+	if config.History == nil {
+		config.History = emptyStringList
+	}
+	os.Stdout.WriteString(config.Prompt)
 	rs := []rune{}
-	linesIdx := len(linesHistory)
+	linesIdx := len(config.History)
 	runeIdx := 0
 
 	keyboard.Listen(func(key keys.Key) (stop bool, err error) {
 		switch key.Code {
 		case keys.CtrlC:
-			onCtrlC()
+			config.OnCtrlC()
 		case keys.Escape:
 			return true, nil
 		case keys.RuneKey:
 			runes := key.Runes
 			rs = append(rs[:runeIdx], append(runes, rs[runeIdx:]...)...)
 			runeIdx += len(runes)
-			resetLine(rs, prompt)
+			resetLine(rs, config.Prompt)
 		case keys.Enter:
 			println()
 			return true, nil
 		case keys.Backspace:
 			if len(rs) > 0 && runeIdx > 0 {
 				rs = append(rs[:runeIdx-1], rs[runeIdx:]...)
-				resetLine(rs, prompt)
+				resetLine(rs, config.Prompt)
 				runeIdx--
 			}
 		case keys.Left:
@@ -61,20 +76,20 @@ func ReadLine(linesHistory []string, onCtrlC func(), prompt string) string {
 		case keys.Up:
 			if linesIdx > 0 {
 				linesIdx--
-				rs = []rune(linesHistory[linesIdx])
-				resetLine(rs, prompt)
+				rs = []rune(config.History[linesIdx])
+				resetLine(rs, config.Prompt)
 				runeIdx = len(rs)
 			}
 		case keys.Down:
-			if linesIdx < len(linesHistory)-1 {
+			if linesIdx < len(config.History)-1 {
 				linesIdx++
-				rs = []rune(linesHistory[linesIdx])
-				resetLine(rs, prompt)
+				rs = []rune(config.History[linesIdx])
+				resetLine(rs, config.Prompt)
 				runeIdx = len(rs)
-			} else if linesIdx == len(linesHistory)-1 {
+			} else if linesIdx == len(config.History)-1 {
 				linesIdx++
 				rs = []rune("")
-				resetLine(rs, prompt)
+				resetLine(rs, config.Prompt)
 				runeIdx = 0
 			}
 		case keys.Space:
@@ -84,7 +99,7 @@ func ReadLine(linesHistory []string, onCtrlC func(), prompt string) string {
 				runeIdx++
 			} else {
 				rs = append(rs[:runeIdx], append([]rune(" "), rs[runeIdx:]...)...)
-				resetLine(rs, prompt)
+				resetLine(rs, config.Prompt)
 				runeIdx++
 			}
 		case keys.Tab:
@@ -94,18 +109,18 @@ func ReadLine(linesHistory []string, onCtrlC func(), prompt string) string {
 				runeIdx++
 			} else {
 				rs = append(rs[:runeIdx], append([]rune("\t"), rs[runeIdx:]...)...)
-				resetLine(rs, prompt)
+				resetLine(rs, config.Prompt)
 				runeIdx++
 			}
 		case keys.Delete:
 			if runeIdx < len(rs) {
 				rs = append(rs[:runeIdx], rs[runeIdx+1:]...)
-				resetLine(rs, prompt)
+				resetLine(rs, config.Prompt)
 			}
 		}
 
 		idx := calcIdx(rs, runeIdx)
-		pRunes := []rune(prompt)
+		pRunes := []rune(config.Prompt)
 		pIdx := calcIdx(pRunes, len(pRunes))
 		cursor.HorizontalAbsolute(idx + pIdx)
 		return false, nil
@@ -150,7 +165,9 @@ func Confirm(question string, default_ bool) bool {
 		return " [y/N]"
 	}()
 
-	input := ReadLine(emptyStringList, exit, fmt.Sprintf("%s%s: ", question, suffix))
+	input := ReadLine(ReadLineConfig{
+		Prompt:fmt.Sprintf("%s%s: ", question, suffix),
+	})
 	if input == "" {
 		return default_
 	}
@@ -164,7 +181,9 @@ func Option(question string, options []string, default_ int) int {
 	}
 	suffix := fmt.Sprintf("[default %d]", default_+1)
 
-	input := ReadLine(emptyStringList, exit, fmt.Sprintf("%s %s:", question, suffix))
+	input := ReadLine(ReadLineConfig{
+		Prompt:fmt.Sprintf("%s %s:", question, suffix),
+	})
 	if input == "" {
 		return default_
 	}
