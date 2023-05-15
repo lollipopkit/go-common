@@ -34,9 +34,6 @@ func ReadLine(config ReadLineConfig) string {
 	if len(config.Prompt) == 0 {
 		config.Prompt = _prompt
 	}
-	if config.OnCtrlC == nil {
-		config.OnCtrlC = exit
-	}
 	if config.History == nil {
 		config.History = emptyStringList
 	}
@@ -48,7 +45,11 @@ func ReadLine(config ReadLineConfig) string {
 	keyboard.Listen(func(key keys.Key) (stop bool, err error) {
 		switch key.Code {
 		case keys.CtrlC:
-			config.OnCtrlC()
+			if config.OnCtrlC != nil {
+				config.OnCtrlC()
+			} else {
+				return true, nil
+			}
 		case keys.Escape:
 			return true, nil
 		case keys.RuneKey:
