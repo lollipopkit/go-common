@@ -28,6 +28,8 @@ type ReadLineConfig struct {
 	OnCtrlC func()
 	// Prompt is the prompt to show.
 	Prompt string
+	// KeyFunc is the function to handle key press.
+	KeyFunc func(key keys.Key) (stop bool, err error)
 }
 
 func ReadLine(config ReadLineConfig) string {
@@ -44,6 +46,10 @@ func ReadLine(config ReadLineConfig) string {
 
 	keyboard.Listen(func(key keys.Key) (stop bool, err error) {
 		switch key.Code {
+		default:
+			if config.KeyFunc != nil {
+				return config.KeyFunc(key) 
+			}
 		case keys.CtrlC:
 			if config.OnCtrlC != nil {
 				config.OnCtrlC()
