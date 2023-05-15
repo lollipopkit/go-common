@@ -21,15 +21,27 @@ const (
 	_prompt = "> "
 )
 
+type KeyListenFunc func(
+	key keys.Key,
+	rs *[]rune,
+	rIdx *int,
+	lIdx *int,
+) (
+	stop bool,
+	reset bool,
+	err error,
+)
+
 type ReadLineConfig struct {
 	// History is the history of lines.
 	History []string
-	// OnCtrlC is the callback when Ctrl+C is pressed.
-	OnCtrlC func()
 	// Prompt is the prompt to show.
 	Prompt string
 	// KeyFunc is the function to handle key press.
-	KeyFunc func(key keys.Key) (stop bool, err error)
+	// rs is the current line runes.
+	// rIdx is the current rune index.
+	// lIdx is the current line index.
+	KeyFunc KeyListenFunc
 }
 
 func ReadLine(config ReadLineConfig) string {
@@ -48,16 +60,14 @@ func ReadLine(config ReadLineConfig) string {
 		switch key.Code {
 		default:
 			if config.KeyFunc != nil {
-				return config.KeyFunc(key) 
+				stop, reset, err := config.KeyFunc(key, &rs, &runeIdx, &linesIdx)
+				if reset {
+					resetLine(rs, config.Prompt)
+				}
+				return stop, err
 			}
 		case keys.CtrlC:
-			if config.OnCtrlC != nil {
-				config.OnCtrlC()
-			} else {
-				return true, nil
-			}
-		case keys.Escape:
-			return true, nil
+			exit()
 		case keys.RuneKey:
 			runes := key.Runes
 			rs = append(rs[:runeIdx], append(runes, rs[runeIdx:]...)...)
@@ -173,7 +183,7 @@ func Confirm(question string, default_ bool) bool {
 	}()
 
 	input := ReadLine(ReadLineConfig{
-		Prompt:fmt.Sprintf("%s%s: ", question, suffix),
+		Prompt: fmt.Sprintf("%s%s: ", question, suffix),
 	})
 	if input == "" {
 		return default_
@@ -189,7 +199,7 @@ func Option(question string, options []string, default_ int) int {
 	suffix := fmt.Sprintf("[default %d]", default_+1)
 
 	input := ReadLine(ReadLineConfig{
-		Prompt:fmt.Sprintf("%s %s:", question, suffix),
+		Prompt: fmt.Sprintf("%s %s:", question, suffix),
 	})
 	if input == "" {
 		return default_

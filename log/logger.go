@@ -23,9 +23,9 @@ type Config struct {
 	PrintTime bool
 	// LogDir is the directory to store log files.
 	// If you set this to empty string (default), log files will not be created.
-	LogDir           string
+	LogDir string
 	// FilePerm is the permission of log files.
-	FilePerm             os.FileMode
+	FilePerm os.FileMode
 }
 
 var (
