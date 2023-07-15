@@ -12,7 +12,7 @@ var (
 	httpClient = http.DefaultClient
 )
 
-func HttpDo(method, url string, content any, headers map[string]string) ([]byte, int, error) {
+func Do(method, url string, content any, headers map[string]string) ([]byte, int, error) {
 	var body io.Reader
 	switch content.(type) {
 	case string:
