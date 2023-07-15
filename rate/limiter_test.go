@@ -8,19 +8,22 @@ import (
 )
 
 func TestRateLimiter(t *testing.T) {
-	l := rate.NewRateLimiter[string](1*time.Second, 10)
+	l := rate.NewLimiter[string](1*time.Second, 10)
 	for i := 0; i < 10; i++ {
-		if !l.Can("a") {
+		if !l.Acquire("a") {
 			t.Fatal("expected true")
 		}
 	}
 
-	if l.Can("a") {
+	if l.Check("a") {
 		t.Fatal("expected false")
 	}
 
 	time.Sleep(1 * time.Second)
-	if !l.Can("a") {
+	if !l.Check("a") {
+		t.Fatal("expected true")
+	}
+	if !l.Acquire("a") {
 		t.Fatal("expected true")
 	}
 }
