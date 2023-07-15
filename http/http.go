@@ -1,22 +1,16 @@
-package util
+package http
 
 import (
 	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 )
 
 var (
 	httpClient = http.DefaultClient
 )
-
-func Exist(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil || os.IsExist(err)
-}
 
 func HttpDo(method, url string, content any, headers map[string]string) ([]byte, int, error) {
 	var body io.Reader
