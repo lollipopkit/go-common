@@ -1,6 +1,11 @@
 package rate
 
-import "time"
+import (
+	"errors"
+	"strconv"
+	"strings"
+	"time"
+)
 
 type RateLimiter[T comparable] struct {
 	Duration time.Duration
@@ -22,6 +27,23 @@ func NewLimiter[T comparable](duration time.Duration, maxCount int) *RateLimiter
 		time:   time.Now(),
 		count:  make(map[T]int),
 	}
+}
+
+// eg: "1/10s" "7/3m"
+func FromString[T comparable](s string) (*RateLimiter[T], error) {
+	splited := strings.Split(s, "/")
+	if len(splited) != 2 {
+		return nil, errors.New("invalid format: "+s)
+	}
+	maxCount, err := strconv.Atoi(splited[0])
+	if err != nil {
+		return nil, err
+	}
+	duration, err := time.ParseDuration(splited[1])
+	if err != nil {
+		return nil, err
+	}
+	return NewLimiter[T](duration, maxCount), nil
 }
 
 func (r *RateLimiter[T]) Check(t T) bool {
