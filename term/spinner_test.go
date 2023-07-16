@@ -1,4 +1,4 @@
-package main
+package term_test
 
 import (
 	"time"
@@ -6,7 +6,7 @@ import (
 	"github.com/lollipopkit/gommon/term"
 )
 
-func main() {
+func TestSpinner() {
 	spinner := term.NewCustomSpinner(term.Frames2, time.Millisecond*77)
 	spinner.SetString("Loading...\n")
 	time.Sleep(3 * time.Second)
