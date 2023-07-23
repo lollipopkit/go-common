@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	warn    = YELLOW + "[WAR] " + NOCOLOR
-	err     = RED + "[ERR] " + NOCOLOR
-	info    = CYAN + "[INF] " + NOCOLOR
-	success = GREEN + "[SUC] " + NOCOLOR
+	warn    = YELLOW + "[WAR]" + NOCOLOR + " "
+	err     = RED + "[ERR]" + NOCOLOR + " "
+	info    = CYAN + "[INF]" + NOCOLOR + " "
+	success = GREEN + "[SUC]" + NOCOLOR + " "
+	debug   = MAGENTA + "[DEBUG]" + NOCOLOR + " "
 )
 
 type Config struct {
@@ -21,9 +22,16 @@ type Config struct {
 	Debug bool
 	// PrintTime is the flag to print time.
 	PrintTime bool
-	// LogDir is the directory to store log files.
+	// LogPath is the directory to store log files.
+	//
 	// If you set this to empty string (default), log files will not be created.
-	LogDir string
+	//
+	// If it not ends with "/", "/" will NOT be appended automatically.
+	LogPath string
+	// LogFileNameFormat is the format of log file name.
+	//
+	// Default is "2006-01-02".
+	LogFileNameFormat string
 	// FilePerm is the permission of log files.
 	FilePerm os.FileMode
 }
@@ -40,8 +48,8 @@ func Setup(config_ Config) {
 		config.FilePerm = 0755
 	}
 
-	if err := os.MkdirAll(config.LogDir, config.FilePerm); err != nil {
-		panic(err)
+	if len(config.LogPath) == 0 {
+		return
 	}
 
 	go setup()
@@ -64,7 +72,7 @@ func Warn(format string, args ...any) {
 }
 
 func Yellow(format string, args ...any) {
-	fmt.Printf(YELLOW+format+NOCOLOR, args...)
+	printf(YELLOW+format+NOCOLOR, args...)
 }
 
 func Info(format string, args ...any) {
@@ -72,7 +80,7 @@ func Info(format string, args ...any) {
 }
 
 func Cyan(format string, args ...any) {
-	fmt.Printf(CYAN+format+NOCOLOR, args...)
+	printf(CYAN+format+NOCOLOR, args...)
 }
 
 func Err(format string, args ...any) {
@@ -80,7 +88,7 @@ func Err(format string, args ...any) {
 }
 
 func Red(format string, args ...any) {
-	fmt.Printf(RED+format+NOCOLOR, args...)
+	printf(RED+format+NOCOLOR, args...)
 }
 
 func Suc(format string, args ...any) {
@@ -88,14 +96,14 @@ func Suc(format string, args ...any) {
 }
 
 func Green(format string, args ...any) {
-	fmt.Printf(GREEN+format+NOCOLOR, args...)
+	printf(GREEN+format+NOCOLOR, args...)
 }
 
 func Debug(format string, args ...any) {
 	if !config.Debug {
 		return
 	}
-	printf("[DEBUG] "+format, args...)
+	printf(debug+format, args...)
 }
 
 // Must call this func using:
@@ -107,19 +115,34 @@ func setup() {
 	}
 	// `logDir` not set
 	// no need to set `writer`
-	if len(config.LogDir) == 0 {
+	if len(config.LogPath) == 0 {
 		return
 	}
 	if ticker == nil {
 		ticker = time.NewTicker(time.Minute)
 	}
 
-	for range ticker.C {
-		file := config.LogDir + time.Now().Format("2006-01-02") + ".txt"
-		logFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, config.FilePerm)
-		if err != nil {
-			panic(err)
-		}
-		writer = io.MultiWriter(os.Stdout, logFile)
+	if err := os.MkdirAll(config.LogPath, config.FilePerm); err != nil {
+		panic(err)
 	}
+
+	// Because ticker will not tick immediately,
+	// we need to set writer manually once before ticker starts.
+	setWritter()
+	for range ticker.C {
+		setWritter()
+	}
+}
+
+func setWritter() {
+	timeFmt := "2006-01-02"
+	if len(config.LogFileNameFormat) > 0 {
+		timeFmt = config.LogFileNameFormat
+	}
+	file := config.LogPath + time.Now().Format(timeFmt) + ".txt"
+	logFile, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_APPEND, config.FilePerm)
+	if err != nil {
+		panic(err)
+	}
+	writer = io.MultiWriter(os.Stdout, logFile)
 }

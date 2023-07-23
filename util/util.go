@@ -12,3 +12,4 @@ func Contains[T comparable](s []T, e T) bool {
 func Clear[T any](s *[]T) {
 	*s = (*s)[:0]
 }
+
