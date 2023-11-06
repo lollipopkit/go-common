@@ -14,7 +14,7 @@ type ExecuteConfig struct {
 }
 
 func (ec *ExecuteConfig) Run() (stdout, stderr string, err error) {
-	cmd := exec.Command(ec.Exec)
+	cmd := exec.Command(ec.Exec, ec.Args...)
 	cmd.Dir = ec.Dir
 	var stdout_, stderr_ bytes.Buffer
 	cmd.Stdout = &stdout_ // 标准输出
