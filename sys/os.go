@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 type ExecuteConfig struct {
@@ -38,12 +39,9 @@ func Exist(path string) bool {
 
 // Return stdout, stderr, error
 func RunScript(scriptPath, workDir string, args ...string) (string, string, error) {
-	cat := exec.Command("cat", scriptPath)
-	cat.Dir = workDir
-
-	args = append([]string{"-s", "--"}, args...)
-	run := exec.Command("bash", args...)
-	run.Stdin, _ = cat.StdoutPipe()
+	args = append([]string{scriptPath}, args...)
+	run := exec.Command("sh", "-c", strings.Join(args, " "))
+	run.Dir = workDir
 
 	var stdout, stderr bytes.Buffer
 	run.Stdout = &stdout
